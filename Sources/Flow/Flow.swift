@@ -38,6 +38,12 @@ extension Flow {
         `catch`(Error.self, handler)
     }
 
+    public func `catch`(
+        _ handler: @escaping () async throws -> Output
+    ) -> Self {
+        `catch`(Error.self) { _ in try await handler() }
+    }
+
     public func `catch`<E: Error>(
         _ error: E.Type,
         _ handler: @escaping (E) async throws -> Output
@@ -47,6 +53,21 @@ extension Flow {
                 return try await self(input)
             } catch let error as E {
                 return try await handler(error)
+            } catch {
+                throw error
+            }
+        }
+    }
+
+    public func `catch`<E: Error>(
+        _ error: E.Type,
+        _ handler: @escaping () async throws -> Output
+    ) -> Self {
+        Flow { input in
+            do {
+                return try await self(input)
+            } catch is E {
+                return try await handler()
             } catch {
                 throw error
             }
