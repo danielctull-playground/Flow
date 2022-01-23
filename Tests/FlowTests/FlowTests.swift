@@ -22,4 +22,11 @@ final class FlowTests: XCTestCase {
         let output = try await flow(2)
         XCTAssertEqual(output, 4)
     }
+
+    func testMap() async throws {
+        let flow = Flow<Int, Int> { 2 * $0 }
+            .map(String.init)
+        let output = try await flow(2)
+        XCTAssertEqual(output, "4")
+    }
 }
