@@ -38,4 +38,31 @@ final class FlowTests: XCTestCase {
         let output = try await flow()
         XCTAssertEqual(output, 4)
     }
+
+    func testRetry1() async throws {
+        var attempts = 0
+        let flow = Flow { attempts += 1; throw Failure() }
+            .retry(1)
+            .catch { _ in } // Allows test to pass
+        try await flow()
+        XCTAssertEqual(attempts, 1)
+    }
+
+    func testRetry2() async throws {
+        var attempts = 0
+        let flow = Flow { attempts += 1; throw Failure() }
+            .retry(2)
+            .catch { _ in } // Allows test to pass
+        try await flow()
+        XCTAssertEqual(attempts, 2)
+    }
+
+    func testRetry3() async throws {
+        var attempts = 0
+        let flow = Flow { attempts += 1; throw Failure() }
+            .retry(3)
+            .catch { _ in } // Allows test to pass
+        try await flow()
+        XCTAssertEqual(attempts, 3)
+    }
 }
