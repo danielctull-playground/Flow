@@ -29,3 +29,18 @@ extension Flow {
         }
     }
 }
+
+extension Flow {
+
+    public func `catch`(
+        _ handler: @escaping (Error) async throws -> Output
+    ) -> Self {
+        Flow { input in
+            do {
+                return try await self(input)
+            } catch {
+                return try await handler(error)
+            }
+        }
+    }
+}

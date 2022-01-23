@@ -4,6 +4,8 @@ import Flow
 
 final class FlowTests: XCTestCase {
 
+    struct Failure: Error {}
+
     func testInput() async throws {
         var input: Int?
         let flow = Flow { input = $0 }
@@ -28,5 +30,12 @@ final class FlowTests: XCTestCase {
             .map(String.init)
         let output = try await flow(2)
         XCTAssertEqual(output, "4")
+    }
+
+    func testCatch() async throws {
+        let flow = Flow<Void, Int> { throw Failure() }
+            .catch { _ in 4 }
+        let output = try await flow()
+        XCTAssertEqual(output, 4)
     }
 }
