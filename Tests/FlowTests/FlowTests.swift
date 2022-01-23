@@ -4,10 +4,10 @@ import Flow
 
 final class FlowTests: XCTestCase {
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(Flow().text, "Hello, World!")
+    func testPerform() async throws {
+        var didPerform = false
+        let flow = Flow { didPerform = true }
+        try await flow()
+        XCTAssert(didPerform)
     }
 }

@@ -1,7 +1,12 @@
 
-public struct Flow {
-    public private(set) var text = "Hello, World!"
+public struct Flow<Output> {
 
-    public init() {
+    private let task: () async throws -> Output
+    public init(_ task: @escaping () async throws -> Output) {
+        self.task = task
+    }
+
+    public func callAsFunction() async throws -> Output {
+        try await task()
     }
 }
