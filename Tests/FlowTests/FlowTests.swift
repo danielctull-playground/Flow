@@ -6,6 +6,7 @@ final class FlowTests: XCTestCase {
 
     struct Failure: Error {}
     struct SomeError: Error {}
+    struct AnotherError: Error {}
 
     func testInput() async throws {
         var input: Int?
@@ -34,16 +35,26 @@ final class FlowTests: XCTestCase {
     }
 
     func testCatch() async throws {
-        let flow = Flow<Void, Int> { throw Failure() }
+
+        let flow = Flow<Error, Int> { throw $0 }
             .catch { _ in 4 }
-        let output = try await flow()
-        XCTAssertEqual(output, 4)
+
+        do {
+            let output = try await flow(Failure())
+            XCTAssertEqual(output, 4)
+        }
+
+        do {
+            let output = try await flow(AnotherError())
+            XCTAssertEqual(output, 4)
+        }
     }
 
-    func testCatchError() async throws {
+    func testCatchSpecific() async throws {
+
         let flow = Flow<Error, Int> { throw $0 }
             .catch(Failure.self) { _ in 1 }
-            .catch { _ in 2}
+            .catch { _ in 2 }
 
         do {
             let output = try await flow(Failure())
@@ -54,6 +65,24 @@ final class FlowTests: XCTestCase {
             let output = try await flow(SomeError())
             XCTAssertEqual(output, 2)
         }
+    }
+
+    func testMapError() async throws {
+
+        let flow = Flow<Error, Void> { throw $0 }
+            .mapError { _ in SomeError() }
+
+        await AssertThrowsError(SomeError.self, try await flow(Failure()))
+        await AssertThrowsError(SomeError.self, try await flow(AnotherError()))
+    }
+
+    func testMapErrorSpecific() async throws {
+
+        let flow = Flow<Error, Void> { throw $0 }
+            .mapError(Failure.self) { _ in SomeError() }
+
+        await AssertThrowsError(SomeError.self, try await flow(Failure()))
+        await AssertThrowsError(AnotherError.self, try await flow(AnotherError()))
     }
 
     func testRetry1() async throws {
@@ -83,3 +112,23 @@ final class FlowTests: XCTestCase {
         XCTAssertEqual(attempts, 3)
     }
 }
+
+// MARK - Asserts
+
+func AssertThrowsError<E: Error, T>(
+    _ error: E.Type,
+    _ expression: @autoclosure () async throws -> T,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    _ errorHandler: (E) -> Void = { _ in }
+) async {
+    do {
+        _ = try await expression()
+    } catch let error as E {
+        errorHandler(error)
+    } catch {
+        XCTFail("Expected error of type \(E.self) but found \(error) instead.")
+    }
+}
+

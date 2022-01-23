@@ -52,6 +52,19 @@ extension Flow {
             }
         }
     }
+
+    public func mapError(
+        _ handler: @escaping (Error) async -> Error
+    ) -> Self {
+        `catch` { throw await handler($0) }
+    }
+
+    public func mapError<E: Error>(
+        _ error: E.Type,
+        _ handler: @escaping (E) async -> Error
+    ) -> Self {
+        `catch`(E.self) { throw await handler($0) }
+    }
     
     /// Attempts to perform the task given number of times.
     ///
