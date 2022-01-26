@@ -21,6 +21,16 @@ extension Flow {
             return try await transform(output)
         }
     }
+
+    public func flatMap<New>(
+        _ transform: @escaping (Output) async throws -> Flow<New>
+    ) -> Flow<New> {
+        Flow<New> {
+            let output = try await self()
+            let flow = try await transform(output)
+            return try await flow()
+        }
+    }
 }
 
 extension Flow {

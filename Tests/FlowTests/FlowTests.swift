@@ -21,6 +21,15 @@ final class FlowTests: XCTestCase {
         XCTAssertEqual(output, "4")
     }
 
+    func testFlatMap() async throws {
+        let flow = Flow { 4 }
+            .flatMap { value in
+                Flow { String(value) }
+            }
+        let output = try await flow()
+        XCTAssertEqual(output, "4")
+    }
+
     func testCatch() async throws {
 
         var failure: Error = Failure()
