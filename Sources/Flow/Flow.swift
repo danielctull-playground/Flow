@@ -92,16 +92,16 @@ extension Flow {
     }
 
     public func mapError(
-        _ transform: @escaping (Error) async -> Error
+        _ transform: @escaping (Error) -> Error
     ) -> Self {
-        `catch` { throw await transform($0) }
+        flatCatch { .fail(transform($0)) }
     }
 
     public func mapError<E: Error>(
         _ error: E.Type,
-        _ transform: @escaping (E) async -> Error
+        _ transform: @escaping (E) -> Error
     ) -> Self {
-        `catch`(E.self) { throw await transform($0) }
+        flatCatch(E.self) { .fail(transform($0)) }
     }
 
     /// Attempts to perform the task given number of times.
