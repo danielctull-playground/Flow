@@ -69,6 +69,45 @@ final class FlowTests: XCTestCase {
         }
     }
 
+    func testFlatCatch() async throws {
+
+        var failure: Error = Failure()
+        let flow = Flow { throw failure }
+            .flatCatch { _ in Flow { 4 } }
+
+        do {
+            failure = Failure()
+            let output = try await flow()
+            XCTAssertEqual(output, 4)
+        }
+
+        do {
+            failure = AnotherError()
+            let output = try await flow()
+            XCTAssertEqual(output, 4)
+        }
+    }
+
+    func testFlatCatchSpecific() async throws {
+
+        var failure: Error = Failure()
+        let flow = Flow { throw failure }
+            .flatCatch(Failure.self) { _ in Flow { 1 } }
+            .flatCatch { _ in Flow { 2 } }
+
+        do {
+            failure = Failure()
+            let output = try await flow()
+            XCTAssertEqual(output, 1)
+        }
+
+        do {
+            failure = SomeError()
+            let output = try await flow()
+            XCTAssertEqual(output, 2)
+        }
+    }
+
     func testMapError() async throws {
 
         var failure: Error = Failure()

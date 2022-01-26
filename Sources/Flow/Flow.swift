@@ -56,6 +56,28 @@ extension Flow {
         }
     }
 
+    public func flatCatch(
+        _ transform: @escaping (Error) async throws -> Flow<Output>
+    ) -> Self {
+        flatCatch(Error.self, transform)
+    }
+
+    public func flatCatch<E: Error>(
+        _ error: E.Type,
+        _ transform: @escaping (E) async throws -> Flow<Output>
+    ) -> Self {
+        Flow {
+            do {
+                return try await self()
+            } catch let error as E {
+                let flow = try await transform(error)
+                return try await flow()
+            } catch {
+                throw error
+            }
+        }
+    }
+
     public func mapError(
         _ transform: @escaping (Error) async -> Error
     ) -> Self {
