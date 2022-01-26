@@ -1,19 +1,35 @@
 
+import Flow
 import XCTest
 
-func AssertThrowsError<E: Error, T>(
+private func AssertThrowsError<E: Error, T>(
     _ error: E.Type,
-    _ expression: @autoclosure () async throws -> T,
-    _ message: @autoclosure () -> String = "",
+    task: () async throws -> T,
+    validation : (E) -> Void = { _ in },
     file: StaticString = #filePath,
-    line: UInt = #line,
-    _ errorHandler: (E) -> Void = { _ in }
+    line: UInt = #line
 ) async {
     do {
-        _ = try await expression()
+        _ = try await task()
     } catch let error as E {
-        errorHandler(error)
+        validation(error)
     } catch {
         XCTFail("Expected error of type \(E.self) but found \(error) instead.")
     }
+}
+
+func AssertFlowThrowsError<Output, E: Error>(
+    _ flow: Flow<Output>,
+    _ error: E.Type,
+    validation : (E) -> Void = { _ in },
+    file: StaticString = #filePath,
+    line: UInt = #line
+) async {
+
+    await AssertThrowsError(
+        E.self,
+        task: { try await flow() },
+        validation: validation,
+        file: file,
+        line: line)
 }

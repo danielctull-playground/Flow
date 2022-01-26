@@ -20,6 +20,6 @@ final class FlowTests: XCTestCase {
 
     func testFail() async throws {
         let flow = Flow<Void>.fail(Failure())
-        await AssertThrowsError(Failure.self, try await flow())
+        await AssertFlowThrowsError(flow, Failure.self)
     }
 }

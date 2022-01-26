@@ -54,9 +54,9 @@ final class ErrorHandlingTests: XCTestCase {
             .mapError { _ in SomeError() }
 
         failure = Failure()
-        await AssertThrowsError(SomeError.self, try await flow())
+        await AssertFlowThrowsError(flow, SomeError.self)
         failure = AnotherError()
-        await AssertThrowsError(SomeError.self, try await flow())
+        await AssertFlowThrowsError(flow, SomeError.self)
     }
 
     func testMapErrorSpecific() async throws {
@@ -66,9 +66,9 @@ final class ErrorHandlingTests: XCTestCase {
             .mapError(Failure.self) { _ in SomeError() }
 
         failure = Failure()
-        await AssertThrowsError(SomeError.self, try await flow())
+        await AssertFlowThrowsError(flow, SomeError.self)
         failure = AnotherError()
-        await AssertThrowsError(AnotherError.self, try await flow())
+        await AssertFlowThrowsError(flow, AnotherError.self)
     }
 
     func testRetry1() async throws {
