@@ -50,44 +50,11 @@ final class FlowTests: XCTestCase {
         }
     }
 
-    func testCatch_ignoreArgument() async throws {
-
-        let flow = Flow<Error, Int> { throw $0 }
-            .catch { 4 }
-
-        do {
-            let output = try await flow(Failure())
-            XCTAssertEqual(output, 4)
-        }
-
-        do {
-            let output = try await flow(AnotherError())
-            XCTAssertEqual(output, 4)
-        }
-    }
-
     func testCatchSpecific() async throws {
 
         let flow = Flow<Error, Int> { throw $0 }
             .catch(Failure.self) { _ in 1 }
             .catch { _ in 2 }
-
-        do {
-            let output = try await flow(Failure())
-            XCTAssertEqual(output, 1)
-        }
-
-        do {
-            let output = try await flow(SomeError())
-            XCTAssertEqual(output, 2)
-        }
-    }
-
-    func testCatchSpecific_ignoreArgument() async throws {
-
-        let flow = Flow<Error, Int> { throw $0 }
-            .catch(Failure.self) { 1 }
-            .catch { 2 }
 
         do {
             let output = try await flow(Failure())
