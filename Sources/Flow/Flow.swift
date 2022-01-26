@@ -1,20 +1,13 @@
 
-public struct Flow<Input, Output> {
+public struct Flow<Output> {
 
-    private let task: (Input) async throws -> Output
-    public init(_ task: @escaping (Input) async throws -> Output) {
+    private let task: () async throws -> Output
+    public init(_ task: @escaping () async throws -> Output) {
         self.task = task
     }
 
-    public func callAsFunction(_ input: Input) async throws -> Output {
-        try await task(input)
-    }
-}
-
-extension Flow where Input == Void {
-
     public func callAsFunction() async throws -> Output {
-        try await task(())
+        try await task()
     }
 }
 
@@ -22,9 +15,9 @@ extension Flow {
 
     public func map<New>(
         _ transform: @escaping (Output) async throws -> New
-    ) -> Flow<Input, New> {
-        Flow<Input, New> { input in
-            let output = try await self(input)
+    ) -> Flow<New> {
+        Flow<New> {
+            let output = try await self()
             return try await transform(output)
         }
     }
@@ -42,9 +35,9 @@ extension Flow {
         _ error: E.Type,
         _ transform: @escaping (E) async throws -> Output
     ) -> Self {
-        Flow { input in
+        Flow {
             do {
-                return try await self(input)
+                return try await self()
             } catch let error as E {
                 return try await transform(error)
             } catch {
@@ -74,13 +67,13 @@ extension Flow {
     public func retry(_ attempts: Int) -> Self {
         guard attempts > 0 else { fatalError("Require attempts of at least 1") }
         guard attempts > 1 else { return self }
-        return Flow { input in
+        return Flow {
             for _ in 1...attempts-1 {
                 do {
-                    return try await self(input)
+                    return try await self()
                 } catch {}
             }
-            return try await self(input)
+            return try await self()
         }
     }
 }

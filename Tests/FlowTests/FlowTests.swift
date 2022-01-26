@@ -8,81 +8,80 @@ final class FlowTests: XCTestCase {
     struct SomeError: Error {}
     struct AnotherError: Error {}
 
-    func testInput() async throws {
-        var input: Int?
-        let flow = Flow { input = $0 }
-        try await flow(2)
-        XCTAssertEqual(input, 2)
-    }
-
     func testOutput() async throws {
         let flow = Flow { "output" }
         let output = try await flow()
         XCTAssertEqual(output, "output")
     }
 
-    func testInputOutput() async throws {
-        let flow = Flow<Int, Int> { 2 * $0 }
-        let output = try await flow(2)
-        XCTAssertEqual(output, 4)
-    }
-
     func testMap() async throws {
-        let flow = Flow<Int, Int> { 2 * $0 }
+        let flow = Flow { 4 }
             .map(String.init)
-        let output = try await flow(2)
+        let output = try await flow()
         XCTAssertEqual(output, "4")
     }
 
     func testCatch() async throws {
 
-        let flow = Flow<Error, Int> { throw $0 }
+        var failure: Error = Failure()
+        let flow = Flow { throw failure }
             .catch { _ in 4 }
 
         do {
-            let output = try await flow(Failure())
+            failure = Failure()
+            let output = try await flow()
             XCTAssertEqual(output, 4)
         }
 
         do {
-            let output = try await flow(AnotherError())
+            failure = AnotherError()
+            let output = try await flow()
             XCTAssertEqual(output, 4)
         }
     }
 
     func testCatchSpecific() async throws {
 
-        let flow = Flow<Error, Int> { throw $0 }
+        var failure: Error = Failure()
+        let flow = Flow { throw failure }
             .catch(Failure.self) { _ in 1 }
             .catch { _ in 2 }
 
         do {
-            let output = try await flow(Failure())
+            failure = Failure()
+            let output = try await flow()
             XCTAssertEqual(output, 1)
         }
 
         do {
-            let output = try await flow(SomeError())
+            failure = SomeError()
+            let output = try await flow()
             XCTAssertEqual(output, 2)
         }
     }
 
     func testMapError() async throws {
 
-        let flow = Flow<Error, Void> { throw $0 }
+        var failure: Error = Failure()
+        let flow = Flow { throw failure }
             .mapError { _ in SomeError() }
 
-        await AssertThrowsError(SomeError.self, try await flow(Failure()))
-        await AssertThrowsError(SomeError.self, try await flow(AnotherError()))
+        failure = Failure()
+        await AssertThrowsError(SomeError.self, try await flow())
+        failure = AnotherError()
+        await AssertThrowsError(SomeError.self, try await flow())
     }
 
     func testMapErrorSpecific() async throws {
 
-        let flow = Flow<Error, Void> { throw $0 }
+        var failure: Error = Failure()
+        let flow = Flow { throw failure }
             .mapError(Failure.self) { _ in SomeError() }
 
-        await AssertThrowsError(SomeError.self, try await flow(Failure()))
-        await AssertThrowsError(AnotherError.self, try await flow(AnotherError()))
+        failure = Failure()
+        await AssertThrowsError(SomeError.self, try await flow())
+        failure = AnotherError()
+        await AssertThrowsError(AnotherError.self, try await flow())
     }
 
     func testRetry1() async throws {
@@ -131,4 +130,3 @@ func AssertThrowsError<E: Error, T>(
         XCTFail("Expected error of type \(E.self) but found \(error) instead.")
     }
 }
-
