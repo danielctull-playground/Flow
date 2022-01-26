@@ -14,15 +14,21 @@ final class FlowTests: XCTestCase {
         XCTAssertEqual(output, "output")
     }
 
+    func testJust() async throws {
+        let flow = Flow.just("output")
+        let output = try await flow()
+        XCTAssertEqual(output, "output")
+    }
+
     func testMap() async throws {
-        let flow = Flow { 4 }
+        let flow = Flow.just(4)
             .map(String.init)
         let output = try await flow()
         XCTAssertEqual(output, "4")
     }
 
     func testFlatMap() async throws {
-        let flow = Flow { 4 }
+        let flow = Flow.just(4)
             .flatMap { value in
                 Flow { String(value) }
             }
@@ -73,7 +79,7 @@ final class FlowTests: XCTestCase {
 
         var failure: Error = Failure()
         let flow = Flow { throw failure }
-            .flatCatch { _ in Flow { 4 } }
+            .flatCatch { _ in .just(4) }
 
         do {
             failure = Failure()
@@ -92,8 +98,8 @@ final class FlowTests: XCTestCase {
 
         var failure: Error = Failure()
         let flow = Flow { throw failure }
-            .flatCatch(Failure.self) { _ in Flow { 1 } }
-            .flatCatch { _ in Flow { 2 } }
+            .flatCatch(Failure.self) { _ in .just(1) }
+            .flatCatch { _ in .just(2) }
 
         do {
             failure = Failure()
