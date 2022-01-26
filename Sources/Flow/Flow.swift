@@ -11,6 +11,10 @@ public struct Flow<Output> {
         Flow { output }
     }
 
+    public static func fail(_ error: Error) -> Self {
+        Flow { throw error }
+    }
+
     public func callAsFunction() async throws -> Output {
         try await task()
     }

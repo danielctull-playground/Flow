@@ -20,6 +20,11 @@ final class FlowTests: XCTestCase {
         XCTAssertEqual(output, "output")
     }
 
+    func testFail() async throws {
+        let flow = Flow<Void>.fail(Failure())
+        await AssertThrowsError(Failure.self, try await flow())
+    }
+
     func testMap() async throws {
         let flow = Flow.just(4)
             .map(String.init)
