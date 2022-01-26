@@ -45,7 +45,7 @@ final class FlowTests: XCTestCase {
 
         var failure: Error = Failure()
         let flow = Flow { throw failure }
-            .catch { _ in 4 }
+            .catch { _ in .just(4) }
 
         do {
             failure = Failure()
@@ -64,47 +64,8 @@ final class FlowTests: XCTestCase {
 
         var failure: Error = Failure()
         let flow = Flow { throw failure }
-            .catch(Failure.self) { _ in 1 }
-            .catch { _ in 2 }
-
-        do {
-            failure = Failure()
-            let output = try await flow()
-            XCTAssertEqual(output, 1)
-        }
-
-        do {
-            failure = SomeError()
-            let output = try await flow()
-            XCTAssertEqual(output, 2)
-        }
-    }
-
-    func testFlatCatch() async throws {
-
-        var failure: Error = Failure()
-        let flow = Flow { throw failure }
-            .flatCatch { _ in .just(4) }
-
-        do {
-            failure = Failure()
-            let output = try await flow()
-            XCTAssertEqual(output, 4)
-        }
-
-        do {
-            failure = AnotherError()
-            let output = try await flow()
-            XCTAssertEqual(output, 4)
-        }
-    }
-
-    func testFlatCatchSpecific() async throws {
-
-        var failure: Error = Failure()
-        let flow = Flow { throw failure }
-            .flatCatch(Failure.self) { _ in .just(1) }
-            .flatCatch { _ in .just(2) }
+            .catch(Failure.self) { _ in .just(1) }
+            .catch { _ in .just(2) }
 
         do {
             failure = Failure()
@@ -147,7 +108,7 @@ final class FlowTests: XCTestCase {
         var attempts = 0
         let flow = Flow { attempts += 1; throw Failure() }
             .retry(1)
-            .catch { _ in } // Allows test to pass
+            .catch { _ in .just(()) } // Allows test to pass
         try await flow()
         XCTAssertEqual(attempts, 1)
     }
@@ -156,7 +117,7 @@ final class FlowTests: XCTestCase {
         var attempts = 0
         let flow = Flow { attempts += 1; throw Failure() }
             .retry(2)
-            .catch { _ in } // Allows test to pass
+            .catch { _ in .just(()) } // Allows test to pass
         try await flow()
         XCTAssertEqual(attempts, 2)
     }
@@ -165,7 +126,7 @@ final class FlowTests: XCTestCase {
         var attempts = 0
         let flow = Flow { attempts += 1; throw Failure() }
             .retry(3)
-            .catch { _ in } // Allows test to pass
+            .catch { _ in .just(()) } // Allows test to pass
         try await flow()
         XCTAssertEqual(attempts, 3)
     }

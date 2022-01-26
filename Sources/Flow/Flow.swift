@@ -49,41 +49,20 @@ extension Flow {
 extension Flow {
 
     public func `catch`(
-        _ transform: @escaping (Error) async throws -> Output
+        _ transform: @escaping (Error) -> Flow<Output>
     ) -> Self {
         `catch`(Error.self, transform)
     }
 
     public func `catch`<E: Error>(
         _ error: E.Type,
-        _ transform: @escaping (E) async throws -> Output
+        _ transform: @escaping (E) -> Flow<Output>
     ) -> Self {
         Flow {
             do {
                 return try await self()
             } catch let error as E {
-                return try await transform(error)
-            } catch {
-                throw error
-            }
-        }
-    }
-
-    public func flatCatch(
-        _ transform: @escaping (Error) async throws -> Flow<Output>
-    ) -> Self {
-        flatCatch(Error.self, transform)
-    }
-
-    public func flatCatch<E: Error>(
-        _ error: E.Type,
-        _ transform: @escaping (E) async throws -> Flow<Output>
-    ) -> Self {
-        Flow {
-            do {
-                return try await self()
-            } catch let error as E {
-                let flow = try await transform(error)
+                let flow = transform(error)
                 return try await flow()
             } catch {
                 throw error
@@ -94,14 +73,14 @@ extension Flow {
     public func mapError(
         _ transform: @escaping (Error) -> Error
     ) -> Self {
-        flatCatch { .fail(transform($0)) }
+        `catch` { .fail(transform($0)) }
     }
 
     public func mapError<E: Error>(
         _ error: E.Type,
         _ transform: @escaping (E) -> Error
     ) -> Self {
-        flatCatch(E.self) { .fail(transform($0)) }
+        `catch`(E.self) { .fail(transform($0)) }
     }
 
     /// Attempts to perform the task given number of times.
