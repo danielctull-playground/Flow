@@ -11,6 +11,7 @@ private func AssertThrowsError<E: Error, T>(
 ) async {
     do {
         _ = try await task()
+        XCTFail("Expected error of type \(E.self) but got success instead.")
     } catch let error as E {
         validation(error)
     } catch {
