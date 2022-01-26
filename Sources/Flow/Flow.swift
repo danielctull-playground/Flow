@@ -106,9 +106,8 @@ extension Flow {
         guard attempts > 1 else { return self }
         return Flow {
             for _ in 1...attempts-1 {
-                do {
-                    return try await self()
-                } catch {}
+                guard let output = try? await self() else { continue }
+                return output
             }
             return try await self()
         }
