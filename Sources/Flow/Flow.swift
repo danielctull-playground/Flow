@@ -16,6 +16,8 @@ public struct Flow<Output> {
     }
 }
 
+// MARK: - Transformations
+
 extension Flow {
 
     public func map<New>(
@@ -37,6 +39,8 @@ extension Flow {
         }
     }
 }
+
+// MARK: - Error Handling
 
 extension Flow {
 
@@ -95,7 +99,7 @@ extension Flow {
     ) -> Self {
         `catch`(E.self) { throw await transform($0) }
     }
-    
+
     /// Attempts to perform the task given number of times.
     ///
     /// - Parameter attempts: The number of times to attempt the ``task``.
