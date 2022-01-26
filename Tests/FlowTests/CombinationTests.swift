@@ -15,68 +15,60 @@ final class CombinationTests: XCTestCase {
     private let g = Flow.just("G")
     private let h = Flow.just("H")
 
-    func testMerge2() async throws {
-        let flow = a.merge(with: b)
+    func testZip2() async throws {
+        let flow = zip(a, b)
         let output = try await flow()
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
+    
+        await AssertFlowThrowsError(zip(fail, b), Failure.self)
+        await AssertFlowThrowsError(zip(a, fail), Failure.self)
     }
 
-    func testMerge2_failure() async throws {
-        await AssertFlowThrowsError(fail.merge(with: b), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: fail), Failure.self)
-    }
-
-    func testMerge3() async throws {
-        let flow = a.merge(with: b, c)
+    func testZip3() async throws {
+        let flow = zip(a, b, c)
         let output = try await flow()
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
         XCTAssertEqual(output.2, "C")
+
+        await AssertFlowThrowsError(zip(fail, b, c), Failure.self)
+        await AssertFlowThrowsError(zip(a, fail, c), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, fail), Failure.self)
     }
 
-    func testMerge3_failure() async throws {
-        await AssertFlowThrowsError(fail.merge(with: b, c), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: fail, c), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, fail), Failure.self)
-    }
-
-    func testMerge4() async throws {
-        let flow = a.merge(with: b, c, d)
+    func testZip4() async throws {
+        let flow = zip(a, b, c, d)
         let output = try await flow()
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
         XCTAssertEqual(output.2, "C")
         XCTAssertEqual(output.3, "D")
+
+        await AssertFlowThrowsError(zip(fail, b, c, d), Failure.self)
+        await AssertFlowThrowsError(zip(a, fail, c, d), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, fail, d), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, fail), Failure.self)
     }
 
-    func testMerge4_failure() async throws {
-        await AssertFlowThrowsError(fail.merge(with: b, c, d), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: fail, c, d), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, fail, d), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, fail), Failure.self)
-    }
-
-    func testMerge5() async throws {
-        let flow = a.merge(with: b, c, d, e)
+    func testZip5() async throws {
+        let flow = zip(a, b, c, d, e)
         let output = try await flow()
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
         XCTAssertEqual(output.2, "C")
         XCTAssertEqual(output.3, "D")
         XCTAssertEqual(output.4, "E")
+
+        await AssertFlowThrowsError(zip(fail, b, c, d, e), Failure.self)
+        await AssertFlowThrowsError(zip(a, fail, c, d, e), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, fail, d, e), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, fail, e), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, fail), Failure.self)
     }
 
-    func testMerge5_failure() async throws {
-        await AssertFlowThrowsError(fail.merge(with: b, c, d, e), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: fail, c, d, e), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, fail, d, e), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, fail, e), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, fail), Failure.self)
-    }
-
-    func testMerge6() async throws {
-        let flow = a.merge(with: b, c, d, e, f)
+    func testZip6() async throws {
+        let flow = zip(a, b, c, d, e, f)
         let output = try await flow()
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
@@ -84,19 +76,17 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.3, "D")
         XCTAssertEqual(output.4, "E")
         XCTAssertEqual(output.5, "F")
+
+        await AssertFlowThrowsError(zip(fail, b, c, d, e, f), Failure.self)
+        await AssertFlowThrowsError(zip(a, fail, c, d, e, f), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, fail, d, e, f), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, fail, e, f), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, fail, f), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, e, fail), Failure.self)
     }
 
-    func testMerge6_failure() async throws {
-        await AssertFlowThrowsError(fail.merge(with: b, c, d, e, f), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: fail, c, d, e, f), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, fail, d, e, f), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, fail, e, f), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, fail, f), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, e, fail), Failure.self)
-    }
-
-    func testMerge7() async throws {
-        let flow = a.merge(with: b, c, d, e, f, g)
+    func testZip7() async throws {
+        let flow = zip(a, b, c, d, e, f, g)
         let output = try await flow()
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
@@ -105,20 +95,18 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.4, "E")
         XCTAssertEqual(output.5, "F")
         XCTAssertEqual(output.6, "G")
+
+        await AssertFlowThrowsError(zip(fail, b, c, d, e, f, g), Failure.self)
+        await AssertFlowThrowsError(zip(a, fail, c, d, e, f, g), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, fail, d, e, f, g), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, fail, e, f, g), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, fail, f, g), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, e, fail, g), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, e, f, fail), Failure.self)
     }
 
-    func testMerge7_failure() async throws {
-        await AssertFlowThrowsError(fail.merge(with: b, c, d, e, f, g), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: fail, c, d, e, f, g), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, fail, d, e, f, g), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, fail, e, f, g), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, fail, f, g), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, e, fail, g), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, e, f, fail), Failure.self)
-    }
-
-    func testMerge8() async throws {
-        let flow = a.merge(with: b, c, d, e, f, g, h)
+    func testZip8() async throws {
+        let flow = zip(a, b, c, d, e, f, g, h)
         let output = try await flow()
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
@@ -128,16 +116,14 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.5, "F")
         XCTAssertEqual(output.6, "G")
         XCTAssertEqual(output.7, "H")
-    }
 
-    func testMerge8_failure() async throws {
-        await AssertFlowThrowsError(fail.merge(with: b, c, d, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: fail, c, d, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, fail, d, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, fail, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, fail, f, g, h), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, e, fail, g, h), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, e, f, fail, h), Failure.self)
-        await AssertFlowThrowsError(a.merge(with: b, c, d, e, f, g, fail), Failure.self)
+        await AssertFlowThrowsError(zip(fail, b, c, d, e, f, g, h), Failure.self)
+        await AssertFlowThrowsError(zip(a, fail, c, d, e, f, g, h), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, fail, d, e, f, g, h), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, fail, e, f, g, h), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, fail, f, g, h), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, e, fail, g, h), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, e, f, fail, h), Failure.self)
+        await AssertFlowThrowsError(zip(a, b, c, d, e, f, g, fail), Failure.self)
     }
 }
