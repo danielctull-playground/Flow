@@ -29,4 +29,13 @@ final class TaskTransformationTests: XCTestCase {
             .map(String.init)
         await AssertSuccess(task, "4")
     }
+
+    func testFlatMap() async throws {
+        let task = Task<Int, Error>
+            .just(4)
+            .flatMap { value in
+                Task.just(String(value))
+            }
+        await AssertSuccess(task, "4")
+    }
 }

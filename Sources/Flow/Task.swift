@@ -26,4 +26,13 @@ extension Task where Failure == Error {
     ) -> Task<NewSuccess, Failure> {
         .init { try await transform(value) }
     }
+
+    public func flatMap<NewSuccess>(
+        _ transform: @escaping (Success) -> Task<NewSuccess, Failure>
+    ) -> Task<NewSuccess, Failure> {
+        .init {
+            let task = try await transform(value)
+            return try await task.value
+        }
+    }
 }
