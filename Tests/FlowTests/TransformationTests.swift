@@ -2,7 +2,7 @@
 import XCTest
 import Flow
 
-final class TransformationTests: XCTestCase {
+final class FlowTransformationTests: XCTestCase {
 
     func testMap() async throws {
         let flow = Flow.just(4)
@@ -18,5 +18,15 @@ final class TransformationTests: XCTestCase {
             }
         let output = try await flow()
         XCTAssertEqual(output, "4")
+    }
+}
+
+final class TaskTransformationTests: XCTestCase {
+
+    func testMap() async throws {
+        let task = Task<Int, Error>
+            .just(4)
+            .map(String.init)
+        await AssertSuccess(task, "4")
     }
 }
