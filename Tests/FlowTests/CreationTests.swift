@@ -2,9 +2,7 @@
 import XCTest
 import Flow
 
-final class FlowTests: XCTestCase {
-
-    struct Failure: Error {}
+final class CreationTests: XCTestCase {
 
     func testInit() async throws {
         let flow = Flow { "output" }
@@ -19,6 +17,7 @@ final class FlowTests: XCTestCase {
     }
 
     func testFail() async throws {
+        struct Failure: Error {}
         let flow = Flow<Void>.fail(Failure())
         await AssertFlowThrowsError(flow, Failure.self)
     }
