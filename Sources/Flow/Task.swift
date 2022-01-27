@@ -36,3 +36,30 @@ extension Task where Failure == Error {
         }
     }
 }
+
+// MARK: - Error Handling
+
+extension Task where Failure == Error {
+
+    public func `catch`(
+        _ transform: @escaping (Error) -> Self
+    ) -> Self {
+        `catch`(Error.self, transform)
+    }
+
+    public func `catch`<E: Error>(
+        _ error: E.Type,
+        _ transform: @escaping (E) -> Self
+    ) -> Self {
+        .init {
+            do {
+                return try await value
+            } catch let error as E {
+                let task = transform(error)
+                return try await task.value
+            } catch {
+                throw error
+            }
+        }
+    }
+}

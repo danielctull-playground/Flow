@@ -2,7 +2,7 @@
 import XCTest
 import Flow
 
-final class ErrorHandlingTests: XCTestCase {
+final class FlowErrorHandlingTests: XCTestCase {
 
     struct Failure: Error {}
     struct SomeError: Error {}
@@ -96,5 +96,33 @@ final class ErrorHandlingTests: XCTestCase {
             .catch { _ in .just(()) } // Allows test to pass
         try await flow()
         XCTAssertEqual(attempts, 3)
+    }
+}
+
+final class TaskErrorHandlingTests: XCTestCase {
+
+    func testCatch() async throws {
+        struct Failure: Error {}
+        let task = Task.fail(Failure())
+            .catch { _ in .just(4) }
+        await AssertSuccess(task, 4)
+    }
+
+    func testCatchSpecific() async throws {
+        struct FailureA: Error {}
+        struct FailureB: Error {}
+
+        do {
+            let task = Task.fail(FailureA())
+                .catch(FailureA.self) { _ in .just("A") }
+                .catch { _ in .just("B") }
+            await AssertSuccess(task, "A")
+        }
+        do {
+            let task = Task.fail(FailureB())
+                .catch(FailureA.self) { _ in .just("A") }
+                .catch { _ in .just("B") }
+            await AssertSuccess(task, "B")
+        }
     }
 }
