@@ -5,96 +5,102 @@ import Flow
 final class ErrorHandlingTests: XCTestCase {
 
     struct Failure: Error {}
-    struct SomeError: Error {}
-    struct AnotherError: Error {}
+    struct ErrorA: Error {}
+    struct ErrorB: Error {}
+    struct ErrorC: Error {}
 
     func testCatch() async throws {
 
-        var failure: Error = Failure()
-        let flow = Flow { throw failure }
-            .catch { _ in .just(4) }
-
-        do {
-            failure = Failure()
-            let output = try await flow()
-            XCTAssertEqual(output, 4)
-        }
-
-        do {
-            failure = AnotherError()
-            let output = try await flow()
-            XCTAssertEqual(output, 4)
+        await AssertOutput(4) {
+            Flow.fail(ErrorA())
+                .catch { _ in .just(4) }
         }
     }
 
     func testCatchSpecific() async throws {
 
-        var failure: Error = Failure()
-        let flow = Flow { throw failure }
-            .catch(Failure.self) { _ in .just(1) }
-            .catch { _ in .just(2) }
-
-        do {
-            failure = Failure()
-            let output = try await flow()
-            XCTAssertEqual(output, 1)
+        await AssertOutput(1) {
+            Flow.fail(ErrorA())
+                .catch(ErrorA.self) { _ in .just(1) }
+                .catch { _ in .just(2) }
         }
 
-        do {
-            failure = SomeError()
-            let output = try await flow()
-            XCTAssertEqual(output, 2)
+        await AssertOutput(2) {
+            Flow.fail(ErrorB())
+                .catch(ErrorA.self) { _ in .just(1) }
+                .catch { _ in .just(2) }
         }
     }
 
     func testMapError() async throws {
 
-        var failure: Error = Failure()
-        let flow = Flow { throw failure }
-            .mapError { _ in SomeError() }
-
-        failure = Failure()
-        await AssertFlowThrowsError(flow, SomeError.self)
-        failure = AnotherError()
-        await AssertFlowThrowsError(flow, SomeError.self)
+        await AssertThrows(ErrorB.self) {
+            Flow<Int>
+                .fail(ErrorA())
+                .mapError { _ in ErrorB() }
+        }
     }
 
     func testMapErrorSpecific() async throws {
 
-        var failure: Error = Failure()
-        let flow = Flow { throw failure }
-            .mapError(Failure.self) { _ in SomeError() }
+        await AssertThrows(ErrorA.self) {
+            Flow<Int>
+                .fail(ErrorA())
+                .mapError(ErrorB.self) { _ in ErrorC() }
+        }
 
-        failure = Failure()
-        await AssertFlowThrowsError(flow, SomeError.self)
-        failure = AnotherError()
-        await AssertFlowThrowsError(flow, AnotherError.self)
+        await AssertThrows(ErrorC.self) {
+            Flow<Int>
+                .fail(ErrorB())
+                .mapError(ErrorB.self) { _ in ErrorC() }
+        }
     }
 
     func testRetry1() async throws {
-        var attempts = 0
-        let flow = Flow { attempts += 1; throw Failure() }
+
+        let attempts = AsyncBox(0)
+
+        await AssertThrows(Failure.self) {
+            Flow {
+                await attempts.increment()
+                throw Failure()
+            }
             .retry(1)
-            .catch { _ in .just(()) } // Allows test to pass
-        try await flow()
-        XCTAssertEqual(attempts, 1)
+        }
+
+        let a = await attempts.value
+        XCTAssertEqual(a, 1)
     }
 
     func testRetry2() async throws {
-        var attempts = 0
-        let flow = Flow { attempts += 1; throw Failure() }
+
+        let attempts = AsyncBox(0)
+
+        await AssertThrows(Failure.self) {
+            Flow {
+                await attempts.increment()
+                throw Failure()
+            }
             .retry(2)
-            .catch { _ in .just(()) } // Allows test to pass
-        try await flow()
-        XCTAssertEqual(attempts, 2)
+        }
+
+        let a = await attempts.value
+        XCTAssertEqual(a, 2)
     }
 
     func testRetry3() async throws {
-        var attempts = 0
-        let flow = Flow { attempts += 1; throw Failure() }
+
+        let attempts = AsyncBox(0)
+
+        await AssertThrows(Failure.self) {
+            Flow {
+                await attempts.increment()
+                throw Failure()
+            }
             .retry(3)
-            .catch { _ in .just(()) } // Allows test to pass
-        try await flow()
-        XCTAssertEqual(attempts, 3)
+        }
+
+        let a = await attempts.value
+        XCTAssertEqual(a, 3)
     }
 }

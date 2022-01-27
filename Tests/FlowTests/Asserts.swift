@@ -2,35 +2,35 @@
 import Flow
 import XCTest
 
-private func AssertThrowsError<E: Error, T>(
+func AssertThrows<Output, E: Error>(
     _ error: E.Type,
-    task: () async throws -> T,
+    _ makeFlow: () -> Flow<Output>,
     validation : (E) -> Void = { _ in },
     file: StaticString = #filePath,
     line: UInt = #line
 ) async {
     do {
-        _ = try await task()
-        XCTFail("Expected error of type \(E.self) but got success instead.")
+        let flow = makeFlow()
+        let output = try await flow()
+        XCTFail("Expected error of type \(E.self) but found output \(output) instead.", file: file, line: line)
     } catch let error as E {
         validation(error)
     } catch {
-        XCTFail("Expected error of type \(E.self) but found \(error) instead.")
+        XCTFail("Expected error of type \(E.self) but found \(error) instead.", file: file, line: line)
     }
 }
 
-func AssertFlowThrowsError<Output, E: Error>(
-    _ flow: Flow<Output>,
-    _ error: E.Type,
-    validation : (E) -> Void = { _ in },
+func AssertOutput<Output: Equatable>(
+    _ expected: @autoclosure () -> Output,
+    _ makeFlow: () -> Flow<Output>,
     file: StaticString = #filePath,
     line: UInt = #line
 ) async {
-
-    await AssertThrowsError(
-        E.self,
-        task: { try await flow() },
-        validation: validation,
-        file: file,
-        line: line)
+    do {
+        let flow = makeFlow()
+        let output = try await flow()
+        XCTAssertEqual(output, expected())
+    } catch {
+        XCTFail("Expected output \(expected()) but found \(error) instead.")
+    }
 }

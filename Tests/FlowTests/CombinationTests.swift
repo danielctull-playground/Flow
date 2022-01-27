@@ -21,8 +21,8 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.0, "A")
         XCTAssertEqual(output.1, "B")
     
-        await AssertFlowThrowsError(zip(fail, b), Failure.self)
-        await AssertFlowThrowsError(zip(a, fail), Failure.self)
+        await AssertThrows(Failure.self) { zip(fail, b) }
+        await AssertThrows(Failure.self) { zip(a, fail) }
     }
 
     func testZip3() async throws {
@@ -32,9 +32,9 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.1, "B")
         XCTAssertEqual(output.2, "C")
 
-        await AssertFlowThrowsError(zip(fail, b, c), Failure.self)
-        await AssertFlowThrowsError(zip(a, fail, c), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, fail), Failure.self)
+        await AssertThrows(Failure.self) { zip(fail, b, c) }
+        await AssertThrows(Failure.self) { zip(a, fail, c) }
+        await AssertThrows(Failure.self) { zip(a, b, fail) }
     }
 
     func testZip4() async throws {
@@ -45,10 +45,10 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.2, "C")
         XCTAssertEqual(output.3, "D")
 
-        await AssertFlowThrowsError(zip(fail, b, c, d), Failure.self)
-        await AssertFlowThrowsError(zip(a, fail, c, d), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, fail, d), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, fail), Failure.self)
+        await AssertThrows(Failure.self) { zip(fail, b, c, d) }
+        await AssertThrows(Failure.self) { zip(a, fail, c, d) }
+        await AssertThrows(Failure.self) { zip(a, b, fail, d) }
+        await AssertThrows(Failure.self) { zip(a, b, c, fail) }
     }
 
     func testZip5() async throws {
@@ -60,11 +60,11 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.3, "D")
         XCTAssertEqual(output.4, "E")
 
-        await AssertFlowThrowsError(zip(fail, b, c, d, e), Failure.self)
-        await AssertFlowThrowsError(zip(a, fail, c, d, e), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, fail, d, e), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, fail, e), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, fail), Failure.self)
+        await AssertThrows(Failure.self) { zip(fail, b, c, d, e) }
+        await AssertThrows(Failure.self) { zip(a, fail, c, d, e) }
+        await AssertThrows(Failure.self) { zip(a, b, fail, d, e) }
+        await AssertThrows(Failure.self) { zip(a, b, c, fail, e) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, fail) }
     }
 
     func testZip6() async throws {
@@ -77,12 +77,12 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.4, "E")
         XCTAssertEqual(output.5, "F")
 
-        await AssertFlowThrowsError(zip(fail, b, c, d, e, f), Failure.self)
-        await AssertFlowThrowsError(zip(a, fail, c, d, e, f), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, fail, d, e, f), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, fail, e, f), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, fail, f), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, e, fail), Failure.self)
+        await AssertThrows(Failure.self) { zip(fail, b, c, d, e, f) }
+        await AssertThrows(Failure.self) { zip(a, fail, c, d, e, f) }
+        await AssertThrows(Failure.self) { zip(a, b, fail, d, e, f) }
+        await AssertThrows(Failure.self) { zip(a, b, c, fail, e, f) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, fail, f) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, e, fail) }
     }
 
     func testZip7() async throws {
@@ -96,13 +96,13 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.5, "F")
         XCTAssertEqual(output.6, "G")
 
-        await AssertFlowThrowsError(zip(fail, b, c, d, e, f, g), Failure.self)
-        await AssertFlowThrowsError(zip(a, fail, c, d, e, f, g), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, fail, d, e, f, g), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, fail, e, f, g), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, fail, f, g), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, e, fail, g), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, e, f, fail), Failure.self)
+        await AssertThrows(Failure.self) { zip(fail, b, c, d, e, f, g) }
+        await AssertThrows(Failure.self) { zip(a, fail, c, d, e, f, g) }
+        await AssertThrows(Failure.self) { zip(a, b, fail, d, e, f, g) }
+        await AssertThrows(Failure.self) { zip(a, b, c, fail, e, f, g) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, fail, f, g) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, e, fail, g) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, e, f, fail) }
     }
 
     func testZip8() async throws {
@@ -117,13 +117,13 @@ final class CombinationTests: XCTestCase {
         XCTAssertEqual(output.6, "G")
         XCTAssertEqual(output.7, "H")
 
-        await AssertFlowThrowsError(zip(fail, b, c, d, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(zip(a, fail, c, d, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, fail, d, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, fail, e, f, g, h), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, fail, f, g, h), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, e, fail, g, h), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, e, f, fail, h), Failure.self)
-        await AssertFlowThrowsError(zip(a, b, c, d, e, f, g, fail), Failure.self)
+        await AssertThrows(Failure.self) { zip(fail, b, c, d, e, f, g, h) }
+        await AssertThrows(Failure.self) { zip(a, fail, c, d, e, f, g, h) }
+        await AssertThrows(Failure.self) { zip(a, b, fail, d, e, f, g, h) }
+        await AssertThrows(Failure.self) { zip(a, b, c, fail, e, f, g, h) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, fail, f, g, h) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, e, fail, g, h) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, e, f, fail, h) }
+        await AssertThrows(Failure.self) { zip(a, b, c, d, e, f, g, fail) }
     }
 }

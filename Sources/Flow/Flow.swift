@@ -1,9 +1,9 @@
 
 public struct Flow<Output> {
 
-    private let task: () async throws -> Output
+    private let task: @Sendable () async throws -> Output
 
-    public init(_ task: @escaping () async throws -> Output) {
+    public init(_ task: @escaping @Sendable () async throws -> Output) {
         self.task = task
     }
 
