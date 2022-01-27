@@ -153,4 +153,46 @@ final class TaskErrorHandlingTests: XCTestCase {
             await AssertFailure(task, FailureB.self)
         }
     }
+
+    func testRetry1() async throws {
+        struct Failure: Error {}
+        let attempts = Box(0)
+        let task = Task { await attempts.increment(); throw Failure() }
+            .retry(1)
+            .catch { _ in .just(()) } // Allows test to pass
+        try await task.value
+        let a = await attempts.value
+        XCTAssertEqual(a, 1)
+    }
+
+    func testRetry2() async throws {
+        struct Failure: Error {}
+        let attempts = Box(0)
+        let task = Task { await attempts.increment(); throw Failure() }
+            .retry(2)
+            .catch { _ in .just(()) } // Allows test to pass
+        try await task.value
+        let a = await attempts.value
+        XCTAssertEqual(a, 2)
+    }
+
+    func testRetry3() async throws {
+        struct Failure: Error {}
+        let attempts = Box(0)
+        let task = Task { await attempts.increment(); throw Failure() }
+            .retry(3)
+            .catch { _ in .just(()) } // Allows test to pass
+        try await task.value
+        let a = await attempts.value
+        XCTAssertEqual(a, 3)
+    }
+}
+
+actor Box<Value> {
+    init(_ value: Value) { self.value = value }
+    var value: Value
+}
+
+extension Box where Value: Numeric {
+    func increment() { value += 1 }
 }
