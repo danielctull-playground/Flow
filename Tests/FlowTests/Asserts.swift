@@ -34,3 +34,35 @@ func AssertFlowThrowsError<Output, E: Error>(
         file: file,
         line: line)
 }
+
+func AssertSuccess<Success: Equatable, Failure>(
+    _ task: @autoclosure () -> Task<Success, Failure>,
+    _ expected: @autoclosure () -> Success,
+    file: StaticString = #filePath,
+    line: UInt = #line
+) async {
+    do {
+        let value = try await task().value
+        XCTAssertEqual(value, expected(), file: file, line: line)
+    } catch {
+        XCTFail("Unexpected failure \(error).", file: file, line: line)
+    }
+}
+
+func AssertFailure<Success, Failure: Error>(
+    _ task: @autoclosure () -> Task<Success, Error>,
+    _ failure: @autoclosure () -> Failure.Type,
+    validation : (Failure) -> Void = { _ in },
+    file: StaticString = #filePath,
+    line: UInt = #line
+) async {
+
+    do {
+        let value = try await task().value
+        XCTFail("Expected error of type \(Failure.self) but received a value of \(value) instead.", file: file, line: line)
+    } catch let failure as Failure {
+        validation(failure)
+    } catch {
+        XCTFail("Expected error of type \(Failure.self) but found \(error) instead.", file: file, line: line)
+    }
+}
