@@ -125,4 +125,32 @@ final class TaskErrorHandlingTests: XCTestCase {
             await AssertSuccess(task, "B")
         }
     }
+
+    func testMapError() async throws {
+        struct FailureA: Error {}
+        struct FailureB: Error {}
+        let task = Task<String, Error>
+            .fail(FailureA())
+            .mapError { _ in FailureB() }
+        await AssertFailure(task, FailureB.self)
+    }
+
+    func testMapErrorSpecific() async throws {
+        struct FailureA: Error {}
+        struct FailureB: Error {}
+        struct FailureC: Error {}
+
+        do {
+            let task = Task<String, Error>
+                .fail(FailureA())
+                .mapError(FailureA.self) { _ in FailureC() }
+            await AssertFailure(task, FailureC.self)
+        }
+        do {
+            let task = Task<String, Error>
+                .fail(FailureB())
+                .mapError(FailureA.self) { _ in FailureC() }
+            await AssertFailure(task, FailureB.self)
+        }
+    }
 }

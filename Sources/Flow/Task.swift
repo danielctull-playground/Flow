@@ -62,4 +62,17 @@ extension Task where Failure == Error {
             }
         }
     }
+
+    public func mapError(
+        _ transform: @escaping (Error) -> Error
+    ) -> Self {
+        `catch` { .fail(transform($0)) }
+    }
+
+    public func mapError<E: Error>(
+        _ error: E.Type,
+        _ transform: @escaping (E) -> Error
+    ) -> Self {
+        `catch`(E.self) { .fail(transform($0)) }
+    }
 }
