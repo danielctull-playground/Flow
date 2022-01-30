@@ -1,5 +1,5 @@
 
-public struct Flow<Output> {
+public struct Flow<Output>: Sendable {
 
     private let task: @Sendable () async throws -> Output
 
