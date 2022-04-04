@@ -67,7 +67,7 @@ func valueB() async throws -> ValueB {
 
 Already we can see that with a more complicated set of recovery functions, this will start to get pretty hectic. The above is a simple example, in the previous app I worked on we had multiple errors which could be recovered from resulting in requiring four nested do/catch blocks and some recovery functions to be duplicated among them.
 
-With `Flow`, upstream failures are caught and resolutions are attempted to pass the value on the next step, in a similar way to reactive programming. This allows code to be easier read and reasoned about, as well as allowing even more complicated proceedures to be written in a simple fashion, such as retrying a step multiple times to find success.
+With `Flow`, upstream failures are caught and resolutions are attempted to pass the value on the next step, in a similar way to reactive programming. This allows code to be easier read and reasoned about, as well as allowing even more complicated procedures to be written in a simple fashion, such as retrying a step multiple times to find success.
 
 ```swift 
 extension Flow where Output == ValueB {
